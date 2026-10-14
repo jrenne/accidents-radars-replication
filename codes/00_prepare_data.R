@@ -78,8 +78,8 @@ if (!file.exists(sentinel)) {
   writeLines(bundle_sha, sentinel)
 }
 
-# Seed immutable spatial matches and derived monthly counts. Full mode can
-# rebuild them with --rebuild-spatial; ordinary runs use the dated snapshot.
+# Seed immutable spatial matches and derived monthly counts. They are rebuilt
+# only when rebuild_spatial_inputs is selected in main.R.
 result_dir <- file.path(root, "results", "current")
 dir.create(result_dir, recursive = TRUE, showWarnings = FALSE)
 seed_files <- c(
