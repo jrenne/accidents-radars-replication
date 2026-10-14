@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+title: Replication package for the effects of fixed speed cameras on injury crashes in France
+message: Please cite the associated paper and this software archive.
+type: software
+authors:
+  - family-names: Renne
+    given-names: Jean-Paul
+repository-code: https://github.com/jrenne/accidents-radars-replication
+license: MIT
+version: 1.0.0
+date-released: 2026-10-14

@@ -1,0 +1,11 @@
+date_confidence,date_evidence,sites,retained_date_min,retained_date_max,median_match_distance_m,probable_replacements,reverse_conflicts
+high,cross_source_date_agreement,857,2003-10-31,2018-05-25,0,0,0
+high,official_only,477,2019-04-13,2024-08-29,,0,0
+medium,earlier_2018_date_probable_replacement,946,2003-10-31,2024-03-29,4.26,946,0
+medium,archive_2018_only,395,2003-12-09,2017-11-13,,0,0
+medium,official_only,27,2003-12-11,2017-11-13,,0,0
+low,earlier_2018_date_probable_replacement,238,2003-10-30,2025-12-23,72.565,238,0
+low,official_only,78,2024-01-17,2025-12-29,,0,0
+low,cross_source_date_agreement,52,2008-08-28,2017-10-09,85.58,0,0
+low,reverse_cross_source_conflict,2,2016-09-08,2016-12-19,15.975,0,2
+low,unclassified,1,2016-12-19,2016-12-19,39.44,0,0

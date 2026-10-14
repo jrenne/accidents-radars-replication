@@ -1,0 +1,16 @@
+.DS_Store
+.Rhistory
+.RData
+.Rproj.user/
+.python/
+data/downloads/
+data/processed/
+data/auxiliary/
+data/derived/
+data/roads/
+data/traffic/*.csv
+data/traffic/shapefiles/
+data/.*
+results/current/*
+!results/current/.gitkeep
+results/current/replication_logs/

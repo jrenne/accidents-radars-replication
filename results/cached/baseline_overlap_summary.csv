@@ -1,0 +1,2 @@
+radius_km,corridor_half_width_m,stacks,unique_treated_sites,unique_control_sites,median_raw_controls,median_effective_controls,propensity_min_raw,propensity_max_raw,propensity_share_trimmed
+2,100,406,406,477,50,49.9847153482205,0.494487678321218,0.505012126770625,0

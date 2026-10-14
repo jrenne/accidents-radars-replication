@@ -1,0 +1,3 @@
+outcome_scale,outcome_description,estimate,std_error_bootstrap,conf_low_95,conf_high_95,p_value_normal,mean_monthly_reference,effect_percent_of_reference,treated_radars,bootstrap_repetitions
+count,Number of injury crashes in the site-month,-0.0192396350440626,0.0066239030726437,-0.0322222465035284,-0.00625702358459672,0.00367749994914676,0.0455665024630541,-42.2231990696725,406,1999
+binary,At least one injury crash in the site-month,-0.0123558241452096,0.00370434648876213,-0.0196162098494408,-0.00509543844097843,0.000851481022156573,0.0377668308702791,-32.7160734975333,406,1999

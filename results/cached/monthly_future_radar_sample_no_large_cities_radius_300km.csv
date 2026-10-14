@@ -1,0 +1,2 @@
+outcome_radius_km,prior_radar_exclusion_km,minimum_control_distance_km,large_city_exclusion,large_city_population_threshold,large_city_buffer_km,sites_removed_by_large_city_filter,admissible_sites,eligible_treated_radars,future_control_only_sites,radar_fixe,active_in_2025,historical_2018_only,vma_observed,matching_strata,autoroute,nationale,departementale,autre
+3,3,6,TRUE,1e+05,10,196,623,497,126,147,588,35,598,20,85,96,189,253

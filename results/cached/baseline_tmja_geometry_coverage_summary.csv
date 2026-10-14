@@ -1,0 +1,5 @@
+maximum_distance_m,treated_national_sites,treated_with_pre_tmja,control_national_sites,controls_with_own_pre_tmja,site_year_matches
+25,131,59,176,72,995
+50,131,67,176,80,1124
+100,131,75,176,84,1218
+300,131,78,176,87,1248

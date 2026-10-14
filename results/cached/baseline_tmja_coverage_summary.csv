@@ -1,0 +1,6 @@
+maximum_distance_m,treated_national_sites,treated_with_pre_tmja,control_national_sites,controls_with_own_pre_tmja,treated_high_quality_chord,site_year_matches
+100,131,23,176,19,12,339
+300,131,40,176,37,16,650
+500,131,54,176,55,20,870
+1000,131,72,176,79,23,1120
+2000,131,82,176,91,25,1280

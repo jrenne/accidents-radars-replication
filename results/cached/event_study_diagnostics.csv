@@ -1,0 +1,11 @@
+outcome,radius_km,pretrend_terms,pretrend_wald_chisq,pretrend_df,pretrend_p_value,reference_event,warning
+accidents,0.5,event_le4;event_le3;event_le2,17.4381520632799,3,0.000574238268766547,-1,TWFE dynamique diagnostique; peut être biaisé si les effets diffèrent selon les cohortes
+killed,0.5,event_le4;event_le3;event_le2,0.963911232628814,3,0.809983416945666,-1,TWFE dynamique diagnostique; peut être biaisé si les effets diffèrent selon les cohortes
+accidents,1,event_le4;event_le3;event_le2,11.6125830295868,3,0.0088352746971652,-1,TWFE dynamique diagnostique; peut être biaisé si les effets diffèrent selon les cohortes
+killed,1,event_le4;event_le3;event_le2,0.524156562849856,3,0.913553157354796,-1,TWFE dynamique diagnostique; peut être biaisé si les effets diffèrent selon les cohortes
+accidents,2,event_le4;event_le3;event_le2,6.24044112903688,3,0.100480551908325,-1,TWFE dynamique diagnostique; peut être biaisé si les effets diffèrent selon les cohortes
+killed,2,event_le4;event_le3;event_le2,2.52045730785819,3,0.471605331885129,-1,TWFE dynamique diagnostique; peut être biaisé si les effets diffèrent selon les cohortes
+accidents,5,event_le4;event_le3;event_le2,4.3651424450249,3,0.224639337606698,-1,TWFE dynamique diagnostique; peut être biaisé si les effets diffèrent selon les cohortes
+killed,5,event_le4;event_le3;event_le2,1.34252138927085,3,0.719061562136738,-1,TWFE dynamique diagnostique; peut être biaisé si les effets diffèrent selon les cohortes
+accidents,7,event_le4;event_le3;event_le2,3.57556517592195,3,0.311093004825917,-1,TWFE dynamique diagnostique; peut être biaisé si les effets diffèrent selon les cohortes
+killed,7,event_le4;event_le3;event_le2,0.837727096176618,3,0.840423537171551,-1,TWFE dynamique diagnostique; peut être biaisé si les effets diffèrent selon les cohortes
