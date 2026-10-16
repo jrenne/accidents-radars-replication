@@ -14,8 +14,8 @@ out_dir <- file.path(root, "results", "current")
 inputs <- data.table(
   corridor_half_width_m = c(50L, 100L),
   file = c(
-    "estimates_monthly_road_corridor_dr_network_balanced12_reach75.csv",
-    "estimates_monthly_road_corridor_dr_network_100m_balanced12_reach75.csv"
+    "estimates_monthly_road_corridor_network_balanced12_reach75.csv",
+    "estimates_monthly_road_corridor_network_100m_balanced12_reach75.csv"
   )
 )
 
@@ -76,4 +76,3 @@ print(family[, .(
   conf_low_bonferroni_95, conf_high_bonferroni_95,
   reject_holm_5pct
 )])
-

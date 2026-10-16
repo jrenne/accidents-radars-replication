@@ -12,7 +12,7 @@ thresholds <- c(50L, 75L, 90L)
 files <- file.path(
   out_dir,
   sprintf(
-    "estimates_monthly_road_corridor_dr_network_100m_balanced12_reach%d.csv",
+    "estimates_monthly_road_corridor_network_100m_balanced12_reach%d.csv",
     thresholds
   )
 )
@@ -27,7 +27,7 @@ results <- rbindlist(lapply(seq_along(files), function(i) {
   pretrend_file <- file.path(
     out_dir,
     sprintf(
-      "pretrend_tests_monthly_road_corridor_dr_network_100m_balanced12_reach%d.csv",
+      "pretrend_tests_monthly_road_corridor_network_100m_balanced12_reach%d.csv",
       thresholds[i]
     )
   )

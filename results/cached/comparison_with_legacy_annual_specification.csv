@@ -1,4 +1,4 @@
-outcome,specification,radius_km,term,estimate,std_error,p_value,n,r_squared,adjusted_r_squared,thesis_estimate,thesis_std_error,estimate_difference,std_error_difference
+outcome,specification,radius_km,term,estimate,std_error,p_value,n,r_squared,adjusted_r_squared,legacy_estimate,legacy_std_error,estimate_difference,std_error_difference
 accidents,year_FE,0.5,installed,0.462486529124339,0.28412015890549,0.10363262102892,5080,0.0156840150517765,0.0139367085696199,0.462,0.284,0.000486529124338553,0.000120158905489554
 accidents,year_FE,1,installed,1.00528263117637,0.763887222680958,0.188233712146828,4816,0.0112242835564277,0.00937264363799428,1.012,0.766,-0.00671736882363105,-0.00211277731904247
 accidents,year_FE,2,installed,1.57125777841004,1.79145391022243,0.380490057355004,4248,0.00520072054683602,0.00308812179386808,1.573,1.791,-0.00174222158996251,0.000453910222427689

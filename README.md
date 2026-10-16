@@ -19,16 +19,23 @@ Three modes are available:
 | Mode | Result |
 |---|---|
 | `quick` | Restore the archived paper results; no download or estimation |
-| `main` | Download the inputs and reproduce the preferred results |
-| `full` | Also reproduce the robustness checks |
+| `main` | Download the inputs and reproduce the main estimates, event study, and figures |
+| `full` | Also reproduce the spatial comparisons and all robustness checks reported in the paper and Online Appendix |
 
 The paper uses 1,999 cluster-bootstrap repetitions. A small value can be used
 for a test run. The spatial inputs are frozen for reproducibility; set
 `rebuild_spatial_inputs <- TRUE` only to reconstruct them from the source
 files.
 
+The main estimator is a simple stacked difference-in-differences: for each
+newly treated camera site, its before--after change is compared with the mean
+change at admissible sites that receive cameras later. The same estimation
+script also runs the cross-fitted doubly robust specification used as a
+covariate-adjusted robustness check.
+
 Long computations are therefore optional: the default `quick` mode uses the
-lightweight cached outputs in `results/cached/`.
+lightweight cached outputs in `results/cached/`. Their checksums are verified
+before they are copied to `results/current/`.
 
 ## Data and requirements
 

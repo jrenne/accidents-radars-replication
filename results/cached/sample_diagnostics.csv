@@ -1,4 +1,4 @@
-radius_km,reconstructed_n,radars,thesis_n,expected_radars,n_difference,coordinate_rule,accidents_total
+radius_km,reconstructed_n,radars,legacy_n,expected_radars,n_difference,coordinate_rule,accidents_total
 0.5,5080,635,5080,635,0,observed coordinates only,384828
 1,4816,602,4800,600,16,observed coordinates only,384828
 2,4248,531,4248,531,0,observed coordinates only,384828

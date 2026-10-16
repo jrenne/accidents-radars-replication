@@ -1,0 +1,13 @@
+outcome,radius_km,design_radius_km,common_radius_sample,balanced_event_horizon,minimum_network_reach_ratio,date_confidence_filter,corridor_half_width_m,spatial_method,window,excluded_cohort,estimate,treated_stacks
+accidents,2,2,FALSE,12,0.75,high_medium,100,network,months_1_12,,-0.0183916847302164,332
+accidents,2,2,FALSE,12,0.75,high_medium,100,network,months_1_12,2012,-0.0256801120314495,230
+accidents,2,2,FALSE,12,0.75,high_medium,100,network,months_1_12,2013,-0.0192293908974514,284
+accidents,2,2,FALSE,12,0.75,high_medium,100,network,months_1_12,2014,-0.019474645485729,306
+accidents,2,2,FALSE,12,0.75,high_medium,100,network,months_1_12,2015,-0.0176323751641612,322
+accidents,2,2,FALSE,12,0.75,high_medium,100,network,months_1_12,2016,-0.0208856082136994,290
+accidents,2,2,FALSE,12,0.75,high_medium,100,network,months_1_12,2017,-0.0196054127141819,312
+accidents,2,2,FALSE,12,0.75,high_medium,100,network,months_1_12,2018,-0.0184136804209086,331
+accidents,2,2,FALSE,12,0.75,high_medium,100,network,months_1_12,2019,-0.018596564138868,328
+accidents,2,2,FALSE,12,0.75,high_medium,100,network,months_1_12,2020,-0.0178681953588072,331
+accidents,2,2,FALSE,12,0.75,high_medium,100,network,months_1_12,2021,-0.00863790655400706,285
+accidents,2,2,FALSE,12,0.75,high_medium,100,network,months_1_12,2022,-0.0176460523700721,301

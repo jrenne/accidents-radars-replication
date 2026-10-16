@@ -10,11 +10,11 @@ out_dir <- file.path(root, "results", "current")
 
 balance_file <- file.path(
   out_dir,
-  "balance_monthly_road_corridor_dr_network_100m_balanced12_reach75.csv"
+  "balance_monthly_road_corridor_network_100m_balanced12_reach75.csv"
 )
 diagnostic_file <- file.path(
   out_dir,
-  "diagnostics_monthly_road_corridor_dr_network_100m_balanced12_reach75.csv"
+  "diagnostics_monthly_road_corridor_network_100m_balanced12_reach75.csv"
 )
 if (!file.exists(balance_file)) stop("Missing balance output: ", balance_file)
 if (!file.exists(diagnostic_file)) stop("Missing diagnostic output: ", diagnostic_file)

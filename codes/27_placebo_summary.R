@@ -12,15 +12,15 @@ out_dir <- file.path(root, "results", "current")
 
 event_file <- file.path(
   out_dir,
-  "event_study_monthly_road_corridor_dr_network_100m_balanced12_reach75.csv"
+  "event_study_monthly_road_corridor_network_100m_balanced12_reach75.csv"
 )
 pretrend_file <- file.path(
   out_dir,
-  "pretrend_tests_monthly_road_corridor_dr_network_100m_balanced12_reach75.csv"
+  "pretrend_tests_monthly_road_corridor_network_100m_balanced12_reach75.csv"
 )
 offroad_file <- file.path(
   out_dir,
-  "estimates_monthly_road_corridor_dr_offroad_100m_balanced12_reach75.csv"
+  "estimates_monthly_road_corridor_offroad_100m_balanced12_reach75.csv"
 )
 paired_file <- file.path(out_dir, "spatial_measurement_paired_differences.csv")
 needed <- c(event_file, pretrend_file, offroad_file, paired_file)

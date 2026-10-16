@@ -73,12 +73,15 @@ steps <- list(
        c("BUILD_ONLY=1", "CORRIDOR_METHOD=network", "CORRIDOR_HALF_WIDTH_M=100",
          "EXCLUDE_LARGE_CITIES=0")),
 
-  step("Estimate baseline, 50 m", "13_doubly_robust_road_corridor_did.R",
+  step("Estimate stacked DiD baseline, 50 m", "13_doubly_robust_road_corridor_did.R",
        c(common_dr, "DR_RADII=1,2,3", "CORRIDOR_METHOD=network",
          "CORRIDOR_HALF_WIDTH_M=50")),
-  step("Estimate baseline, 100 m", "13_doubly_robust_road_corridor_did.R",
+  step("Estimate stacked DiD baseline, 100 m", "13_doubly_robust_road_corridor_did.R",
        c(common_dr, "DR_RADII=1,2,3", "CORRIDOR_METHOD=network",
          "CORRIDOR_HALF_WIDTH_M=100")),
+  step("Estimate doubly robust robustness check", "13_doubly_robust_road_corridor_did.R",
+       c(common_dr, "DR_RADII=1,2,3", "CORRIDOR_METHOD=network",
+         "CORRIDOR_HALF_WIDTH_M=100", "PRIMARY_ESTIMATOR=doubly_robust")),
   step("Estimate balanced dynamics, 50 m", "13_doubly_robust_road_corridor_did.R",
        c(paste0("DR_BOOTSTRAP_REPETITIONS=", bootstrap_repetitions), "DR_BALANCED_EVENT_HORIZON=24",
          "DR_MIN_NETWORK_REACH_RATIO=0.75", "DR_RADII=2",
@@ -158,7 +161,9 @@ spatial_labels <- c(
   "Build corridors including large cities"
 )
 main_labels <- c(
-  "Audit treatment dates", "Estimate baseline, 50 m", "Estimate baseline, 100 m",
+  "Audit treatment dates", "Estimate stacked DiD baseline, 50 m",
+  "Estimate stacked DiD baseline, 100 m",
+  "Estimate doubly robust robustness check",
   "Estimate balanced dynamics, 50 m", "Estimate balanced dynamics, 100 m",
   "Estimate common-radius sample", "Validate doubly robust score",
   "Plot main event study", "Map and describe baseline sample",

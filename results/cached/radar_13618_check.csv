@@ -1,4 +1,4 @@
-annee,accidents,killed,thesis_accidents,thesis_killed,accidents_difference,killed_difference
+annee,accidents,killed,legacy_accidents,legacy_killed,accidents_difference,killed_difference
 2005,1,0,24,0,-23,0
 2006,1,0,17,0,-16,0
 2007,9,1,18,1,-9,0

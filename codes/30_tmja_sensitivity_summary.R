@@ -6,7 +6,7 @@ suppressPackageStartupMessages(library(data.table))
 
 root <- normalizePath(".")
 out_dir <- file.path(root, "results", "current")
-stem <- "monthly_road_corridor_dr_network_100m_balanced12_reach75"
+stem <- "monthly_road_corridor_network_100m_balanced12_reach75"
 
 extract_row <- function(label, suffix = "") {
   estimates <- fread(file.path(out_dir, paste0("estimates_", stem, suffix, ".csv")))[

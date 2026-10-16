@@ -11,7 +11,7 @@ root <- normalizePath(".")
 out_dir <- file.path(root, "results", "current")
 input_file <- file.path(
   out_dir,
-  "leave_one_cohort_out_monthly_road_corridor_dr_network_100m_balanced12_reach75.csv"
+  "leave_one_cohort_out_monthly_road_corridor_network_100m_balanced12_reach75.csv"
 )
 if (!file.exists(input_file)) stop("Missing cohort diagnostic: ", input_file)
 

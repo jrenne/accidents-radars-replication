@@ -17,10 +17,10 @@ results <- rbindlist(lapply(seq_len(nrow(variants)), function(i) {
   suffix <- variants$suffix[i]
   stem <- paste0("_network_100m_balanced12_reach75", suffix)
   estimate_file <- file.path(
-    out_dir, paste0("estimates_monthly_road_corridor_dr", stem, ".csv")
+    out_dir, paste0("estimates_monthly_road_corridor", stem, ".csv")
   )
   pretrend_file <- file.path(
-    out_dir, paste0("pretrend_tests_monthly_road_corridor_dr", stem, ".csv")
+    out_dir, paste0("pretrend_tests_monthly_road_corridor", stem, ".csv")
   )
   if (!file.exists(estimate_file)) stop("Missing estimate input: ", estimate_file)
   if (!file.exists(pretrend_file)) stop("Missing pretrend input: ", pretrend_file)

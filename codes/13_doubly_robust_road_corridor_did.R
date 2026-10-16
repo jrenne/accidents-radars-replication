@@ -1,11 +1,12 @@
 #!/usr/bin/env Rscript
 
-# Doubly robust extension of the road-corridor design.
+# Stacked road-corridor difference-in-differences.
 #
 # Each treated camera defines a local stack anchored at its installation month.
 # Eligible controls are future-treated camera locations in the same road-class
-# and speed-limit stratum. Nuisance models are fitted on the pooled stacks with
-# site-level cross-fitting:
+# and speed-limit stratum. The default estimator gives those controls equal
+# weight. Setting PRIMARY_ESTIMATOR=doubly_robust adds nuisance models fitted
+# on the pooled stacks with site-level cross-fitting:
 #   1. a propensity model for being the treated site rather than a future site;
 #   2. an outcome model for the untreated change in monthly crashes.
 # The augmented inverse-probability score is then averaged over treated stacks.
@@ -31,11 +32,16 @@ spatial_method <- match.arg(
   c("network", "euclidean", "circle", "offroad")
 )
 bootstrap_repetitions <- as.integer(Sys.getenv("DR_BOOTSTRAP_REPETITIONS", "1999"))
+primary_estimator <- match.arg(
+  Sys.getenv("PRIMARY_ESTIMATOR", "plain"),
+  c("plain", "doubly_robust")
+)
 crossfit_folds <- as.integer(Sys.getenv("DR_CROSSFIT_FOLDS", "5"))
 nuisance_method <- match.arg(
   Sys.getenv("DR_NUISANCE_METHOD", "ridge"), c("ridge", "glm")
 )
-if (nuisance_method == "ridge" && !requireNamespace("glmnet", quietly = TRUE)) {
+if (primary_estimator == "doubly_robust" && nuisance_method == "ridge" &&
+    !requireNamespace("glmnet", quietly = TRUE)) {
   stop("DR_NUISANCE_METHOD=ridge requires the R package 'glmnet'.")
 }
 if (!is.finite(crossfit_folds) || crossfit_folds < 2L) {
@@ -217,8 +223,11 @@ if (exclude_large_cities) {
 counts <- fread(counts_file)
 usable_ids <- unique(counts$cle_radar)
 if (minimum_network_reach_ratio > 0) {
+  # The reach rule defines the common network-based risk set even when the
+  # outcome is subsequently counted with a circle or Euclidean corridor.
+  geometry_suffix <- paste0("_network", width_suffix, city_suffix)
   geometry_diagnostic_file <- file.path(
-    out_dir, paste0("road_corridor_geometry_diagnostics", count_suffix, ".csv")
+    out_dir, paste0("road_corridor_geometry_diagnostics", geometry_suffix, ".csv")
   )
   geometry_diagnostics <- fread(geometry_diagnostic_file)
   reach_columns <- c(
@@ -467,7 +476,8 @@ estimate_radius <- function(radius) {
            " and window ", event_start, ":", event_end)
     }
 
-    dat[, `:=`(
+    if (primary_estimator == "doubly_robust") {
+      dat[, `:=`(
       pre_24_13_z = standardize(pre_24_13),
       pre_12_7_z = standardize(pre_12_7),
       pre_6_1_z = standardize(pre_6_1),
@@ -547,7 +557,18 @@ estimate_radius <- function(radius) {
     dat[, propensity := pmax(
       propensity_trim[1], pmin(propensity_trim[2], propensity_raw)
     )]
-    dat[, residual := change - untreated_prediction]
+      dat[, residual := change - untreated_prediction]
+    } else {
+      # The main specification is the transparent within-stack DiD. Equal
+      # control weights correspond to a constant propensity score; no nuisance
+      # model is estimated for this path.
+      dat[, `:=`(
+        propensity_raw = 0.5,
+        propensity = 0.5,
+        untreated_prediction = 0,
+        residual = change
+      )]
+    }
 
     dat_by_stack <- split(dat, by = "stack_id", keep.by = FALSE)
     for (s in seq_along(stacks)) {
@@ -571,8 +592,12 @@ estimate_radius <- function(radius) {
       stack_id = seq_along(stacks),
       treated_year = vapply(stacks, `[[`, integer(1), "treated_year"),
       score = vapply(stacks, function(stack) {
-        stack$treated_residual -
-          weighted.mean(stack$control_residual, stack$control_odds)
+        if (primary_estimator == "plain") {
+          stack$treated_change - mean(stack$control_change)
+        } else {
+          stack$treated_residual -
+            weighted.mean(stack$control_residual, stack$control_odds)
+        }
       }, numeric(1))
     )
     # Influence diagnostic: nuisance predictions and within-stack weights are
@@ -674,18 +699,21 @@ estimate_radius <- function(radius) {
       inverse_probability = aggregate_stacks(estimator = "ipw"),
       doubly_robust = aggregate_stacks(estimator = "dr")
     )
-    boot_dr <- apply(shared_boot_weights, 2, aggregate_stacks, estimator = "dr")
-    boot_dr <- boot_dr[is.finite(boot_dr)]
-    se <- sd(boot_dr)
+    estimator_code <- if (primary_estimator == "plain") "plain" else "dr"
+    boot_primary <- apply(
+      shared_boot_weights, 2, aggregate_stacks, estimator = estimator_code
+    )
+    boot_primary <- boot_primary[is.finite(boot_primary)]
+    se <- sd(boot_primary)
 
     effective_controls <- vapply(stacks, function(x) {
       1 / sum(x$control_odds^2)
     }, numeric(1))
     treated_rows <- dat[treated == 1L]
     list(
-      estimate = estimates["doubly_robust"],
+      estimate = estimates[primary_estimator],
       se = se,
-      boot = boot_dr,
+      boot = boot_primary,
       estimates = estimates,
       balance = balance,
       leave_one_cohort_out = leave_one_cohort_out,
@@ -712,6 +740,7 @@ estimate_radius <- function(radius) {
         residual_max = max(dat$residual),
         crossfit_folds = crossfit_folds,
         nuisance_method = nuisance_method,
+        primary_estimator = primary_estimator,
         plain_estimate_same_stacks = estimates["plain"],
         outcome_regression_estimate = estimates["outcome_regression"],
         inverse_probability_estimate = estimates["inverse_probability"],
@@ -756,6 +785,7 @@ estimate_radius <- function(radius) {
         traffic_match_distance_m = if (traffic_adjustment) traffic_match_distance_m else NA_real_,
         corridor_half_width_m = corridor_half_width_m,
         spatial_method = spatial_method,
+        estimator = primary_estimator,
         window_type = window_types[j],
         window = label,
         estimate = estimate,
@@ -883,7 +913,8 @@ estimate_radius <- function(radius) {
   )
 }
 
-message("Estimating doubly robust stacked comparisons...")
+message("Estimating stacked comparisons (primary estimator: ",
+        primary_estimator, ")...")
 radius_results <- lapply(radii_km, estimate_radius)
 results <- rbindlist(lapply(radius_results, `[[`, "results"), fill = TRUE)
 diagnostics <- rbindlist(lapply(radius_results, `[[`, "diagnostics"), fill = TRUE)
@@ -939,21 +970,25 @@ results[window_type == "event", `:=`(
   simultaneous_critical_95 = event_rows$simultaneous_critical_95
 )]
 
+output_stem <- function(stem) {
+  if (primary_estimator == "plain") stem else paste0(stem, "_dr")
+}
+
 fwrite(
   results[window_type == "event"][, window_type := NULL],
-  output_path("event_study_monthly_road_corridor_dr")
+  output_path(output_stem("event_study_monthly_road_corridor"))
 )
 fwrite(
   results[window_type == "average"][, window_type := NULL],
-  output_path("estimates_monthly_road_corridor_dr")
+  output_path(output_stem("estimates_monthly_road_corridor"))
 )
-fwrite(diagnostics, output_path("diagnostics_monthly_road_corridor_dr"))
-fwrite(pretrends, output_path("pretrend_tests_monthly_road_corridor_dr"))
-fwrite(bootstrap_draws, output_path("bootstrap_monthly_road_corridor_dr"))
-fwrite(balance_diagnostics, output_path("balance_monthly_road_corridor_dr"))
+fwrite(diagnostics, output_path(output_stem("diagnostics_monthly_road_corridor")))
+fwrite(pretrends, output_path(output_stem("pretrend_tests_monthly_road_corridor")))
+fwrite(bootstrap_draws, output_path(output_stem("bootstrap_monthly_road_corridor")))
+fwrite(balance_diagnostics, output_path(output_stem("balance_monthly_road_corridor")))
 fwrite(
   cohort_diagnostics,
-  output_path("leave_one_cohort_out_monthly_road_corridor_dr")
+  output_path(output_stem("leave_one_cohort_out_monthly_road_corridor"))
 )
 
 message("First-year injury-crash estimates:")

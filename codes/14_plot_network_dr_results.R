@@ -8,16 +8,16 @@ out_dir <- file.path(root, "results", "current")
 result_files <- data.table(
   corridor_half_width_m = c(50, 100),
   event_file = c(
-    "event_study_monthly_road_corridor_dr_network_balanced24_reach75.csv",
-    "event_study_monthly_road_corridor_dr_network_100m_balanced24_reach75.csv"
+    "event_study_monthly_road_corridor_network_balanced24_reach75.csv",
+    "event_study_monthly_road_corridor_network_100m_balanced24_reach75.csv"
   ),
   average_file = c(
-    "estimates_monthly_road_corridor_dr_network_balanced12_reach75.csv",
-    "estimates_monthly_road_corridor_dr_network_100m_balanced12_reach75.csv"
+    "estimates_monthly_road_corridor_network_balanced12_reach75.csv",
+    "estimates_monthly_road_corridor_network_100m_balanced12_reach75.csv"
   ),
   pretrend_file = c(
-    "pretrend_tests_monthly_road_corridor_dr_network_balanced12_reach75.csv",
-    "pretrend_tests_monthly_road_corridor_dr_network_100m_balanced12_reach75.csv"
+    "pretrend_tests_monthly_road_corridor_network_balanced12_reach75.csv",
+    "pretrend_tests_monthly_road_corridor_network_100m_balanced12_reach75.csv"
   )
 )
 
@@ -48,7 +48,7 @@ summary <- merge(
   all.x = TRUE
 )
 setorder(summary, corridor_half_width_m, radius_km)
-fwrite(summary, file.path(out_dir, "network_dr_baseline_summary.csv"))
+fwrite(summary, file.path(out_dir, "network_baseline_summary.csv"))
 
 events <- events[outcome == "accidents" & radius_km == 2]
 window_order <- c(
@@ -67,7 +67,7 @@ ylim <- range(c(
 ), finite = TRUE)
 
 png(
-  file.path(out_dir, "event_study_road_corridor_network_dr.png"),
+  file.path(out_dir, "event_study_road_corridors.png"),
   width = 2200, height = 1350, res = 220
 )
 par(mar = c(5.8, 6.8, 1.0, 1.0), mgp = c(3.6, 1.0, 0), tcl = -0.3)

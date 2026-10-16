@@ -12,16 +12,16 @@ out_dir <- file.path(root, "results", "current")
 designs <- data.table(
   design = c("circle", "offroad", "road_euclidean", "road_network"),
   result_file = c(
-    "estimates_monthly_road_corridor_dr_circle_100m_balanced12_reach75.csv",
-    "estimates_monthly_road_corridor_dr_offroad_100m_balanced12_reach75.csv",
-    "estimates_monthly_road_corridor_dr_100m_balanced12_reach75.csv",
-    "estimates_monthly_road_corridor_dr_network_100m_balanced12_reach75.csv"
+    "estimates_monthly_road_corridor_circle_100m_balanced12_reach75.csv",
+    "estimates_monthly_road_corridor_offroad_100m_balanced12_reach75.csv",
+    "estimates_monthly_road_corridor_100m_balanced12_reach75.csv",
+    "estimates_monthly_road_corridor_network_100m_balanced12_reach75.csv"
   ),
   bootstrap_file = c(
-    "bootstrap_monthly_road_corridor_dr_circle_100m_balanced12_reach75.csv",
-    "bootstrap_monthly_road_corridor_dr_offroad_100m_balanced12_reach75.csv",
-    "bootstrap_monthly_road_corridor_dr_100m_balanced12_reach75.csv",
-    "bootstrap_monthly_road_corridor_dr_network_100m_balanced12_reach75.csv"
+    "bootstrap_monthly_road_corridor_circle_100m_balanced12_reach75.csv",
+    "bootstrap_monthly_road_corridor_offroad_100m_balanced12_reach75.csv",
+    "bootstrap_monthly_road_corridor_100m_balanced12_reach75.csv",
+    "bootstrap_monthly_road_corridor_network_100m_balanced12_reach75.csv"
   )
 )
 

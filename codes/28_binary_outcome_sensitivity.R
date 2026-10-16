@@ -10,12 +10,12 @@ root <- normalizePath(".")
 out_dir <- file.path(root, "results", "current")
 baseline_file <- file.path(
   out_dir,
-  "estimates_monthly_road_corridor_dr_network_100m_balanced12_reach75.csv"
+  "estimates_monthly_road_corridor_network_100m_balanced12_reach75.csv"
 )
 binary_file <- file.path(
   out_dir,
   paste0(
-    "estimates_monthly_road_corridor_dr_network_100m_balanced12_reach75",
+    "estimates_monthly_road_corridor_network_100m_balanced12_reach75",
     "_outcome_binary.csv"
   )
 )

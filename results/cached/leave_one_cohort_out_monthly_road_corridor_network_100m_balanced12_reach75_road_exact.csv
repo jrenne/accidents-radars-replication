@@ -1,0 +1,7 @@
+outcome,radius_km,design_radius_km,common_radius_sample,balanced_event_horizon,minimum_network_reach_ratio,date_confidence_filter,corridor_half_width_m,spatial_method,window,excluded_cohort,estimate,treated_stacks
+accidents,2,2,FALSE,12,0.75,all,100,network,months_1_12,,-0.0102711694772975,184
+accidents,2,2,FALSE,12,0.75,all,100,network,months_1_12,2012,-0.0130540223217909,76
+accidents,2,2,FALSE,12,0.75,all,100,network,months_1_12,2013,-0.0113363403347833,139
+accidents,2,2,FALSE,12,0.75,all,100,network,months_1_12,2014,-0.00770736514598002,162
+accidents,2,2,FALSE,12,0.75,all,100,network,months_1_12,2015,-0.010630759806427,177
+accidents,2,2,FALSE,12,0.75,all,100,network,months_1_12,2016,-0.0102279455654596,182
