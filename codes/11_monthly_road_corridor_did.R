@@ -384,7 +384,7 @@ mean_window <- function(values, radar_indices, months, month_columns) {
 
 event_windows <- list(
   `-24:-19` = c(-24L, -19L), `-18:-13` = c(-18L, -13L),
-  `-12:-7` = c(-12L, -7L), `+1:+6` = c(1L, 6L),
+  `+1:+6` = c(1L, 6L),
   `+7:+12` = c(7L, 12L), `+13:+18` = c(13L, 18L),
   `+19:+24` = c(19L, 24L)
 )
@@ -412,7 +412,6 @@ estimate_radius <- function(radius) {
   candidates <- candidates[keep]
   setorder(candidates, cle_radar)
   candidates[, radar_index := .I]
-  candidates[, eligible_treated := installation_year <= 2022L]
 
   radius_counts <- counts[radius_km == radius & cle_radar %chin% candidates$cle_radar]
   accident_matrix <- dcast(radius_counts, cle_radar ~ month_index, value.var = "accidents")
@@ -429,10 +428,10 @@ estimate_radius <- function(radius) {
   build_cells <- function(values, event_start, event_end) {
     cells <- list()
     j <- 1L
-    for (i in candidates[eligible_treated == TRUE, radar_index]) {
+    for (i in candidates[installation_year <= 2022L, radar_index]) {
       anchor <- candidates$installation_month[i]
       evaluation <- anchor + event_start:event_end
-      reference <- anchor + (-6L:-1L)
+      reference <- anchor + (-12L:-1L)
       if (min(c(evaluation, reference)) < min(all_months) ||
           max(c(evaluation, reference)) > max(all_months)) next
       if (event_end > 0 && candidates$next_nearby_installation_month[i] <= anchor + event_end) next
@@ -507,7 +506,7 @@ estimate_radius <- function(radius) {
           treated_radars = length(treated),
           median_controls_per_radar = median(vapply(cells, function(x) length(x$controls), integer(1))),
           admissible_sites = nrow(candidates), bootstrap_repetitions = length(boot),
-          reference_window_months = "-6:-1"
+          reference_window_months = "-12:-1"
         )
         setnames(result[[j]], "window", window_column)
         j <- j + 1L
@@ -517,7 +516,7 @@ estimate_radius <- function(radius) {
   }
 
   estimate_pretrend_test <- function() {
-    pre_windows <- event_windows[1:3]
+    pre_windows <- event_windows[1:2]
     tests <- list()
     for (outcome in c("accidents", "killed")) {
       values <- if (outcome == "accidents") accident_values else killed_values

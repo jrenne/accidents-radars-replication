@@ -280,7 +280,6 @@ if (traffic_adjustment) {
 event_windows <- list(
   `-24:-19` = c(-24L, -19L),
   `-18:-13` = c(-18L, -13L),
-  `-12:-7` = c(-12L, -7L),
   `+1:+6` = c(1L, 6L),
   `+7:+12` = c(7L, 12L),
   `+13:+18` = c(13L, 18L),
@@ -357,7 +356,10 @@ estimate_radius <- function(radius) {
   setorder(candidates, cle_radar)
   accident_matrix <- accident_matrix[match(candidates$cle_radar, cle_radar)]
   killed_matrix <- killed_matrix[match(candidates$cle_radar, cle_radar)]
-  candidates[, `:=`(site_index = .I, eligible_treated = installation_year <= 2022L)]
+  candidates[, `:=`(
+    site_index = .I,
+    eligible_treated = installation_year <= 2022L
+  )]
   set.seed(20262800L + as.integer(radius * 100))
   candidates[, crossfit_fold := sample(rep(
     seq_len(crossfit_folds), length.out = .N
@@ -387,9 +389,10 @@ estimate_radius <- function(radius) {
     for (treated_index in treated_indices) {
       anchor <- candidates$installation_month[treated_index]
       evaluation <- anchor + event_start:event_end
-      reference <- anchor + (-6L:-1L)
+      reference <- anchor + (-12L:-1L)
       pre_24_13 <- anchor + (-24L:-13L)
       pre_12_7 <- anchor + (-12L:-7L)
+      pre_6_1 <- anchor + (-6L:-1L)
       eligibility_end <- max(0L, event_end, balanced_event_horizon)
       needed <- c(
         evaluation, reference, pre_24_13, pre_12_7,
@@ -426,11 +429,14 @@ estimate_radius <- function(radius) {
       if (length(controls) < minimum_controls) next
 
       site_indices <- c(treated_index, controls)
+      reference_mean <- mean_window(
+        values, site_indices, reference, month_columns
+      )
       change <- mean_window(values, site_indices, evaluation, month_columns) -
-        mean_window(values, site_indices, reference, month_columns)
+        reference_mean
       pre_a <- mean_window(values, site_indices, pre_24_13, month_columns)
       pre_b <- mean_window(values, site_indices, pre_12_7, month_columns)
-      pre_c <- mean_window(values, site_indices, reference, month_columns)
+      pre_c <- mean_window(values, site_indices, pre_6_1, month_columns)
       if (any(!is.finite(c(change, pre_a, pre_b, pre_c)))) next
 
       n_controls <- length(controls)
@@ -453,7 +459,7 @@ estimate_radius <- function(radius) {
         base_weight = c(1, rep(1 / n_controls, n_controls)),
         anchor_year = anchor_year,
         anchor_month_of_year = anchor %% 12L + 1L,
-        treated_reference = pre_c[1]
+        treated_reference = reference_mean[1]
       )]
       rows[[row_cursor]] <- block
       stacks[[stack_cursor]] <- list(
@@ -861,7 +867,7 @@ estimate_radius <- function(radius) {
         )
         cohort_cursor <- cohort_cursor + 1L
       }
-      if (label %chin% names(event_windows)[1:3]) {
+      if (label %chin% names(event_windows)[1:2]) {
         pretrend_boot[[outcome]][[label]] <- fit$boot
       }
       result_cursor <- result_cursor + 1L
@@ -872,7 +878,7 @@ estimate_radius <- function(radius) {
 
   pretrend_tests <- list()
   for (outcome in c("accidents", "killed")) {
-    pre_labels <- names(event_windows)[1:3]
+    pre_labels <- names(event_windows)[1:2]
     point <- vapply(pre_labels, function(label) {
       results[[which(vapply(results, function(x)
         x$outcome == outcome && x$window == label, logical(1)))]]$estimate
@@ -897,8 +903,8 @@ estimate_radius <- function(radius) {
       corridor_half_width_m = corridor_half_width_m,
       spatial_method = spatial_method,
       pretrend_wald_statistic = statistic,
-      degrees_of_freedom = 3L,
-      pretrend_p_value = pchisq(statistic, df = 3L, lower.tail = FALSE),
+      degrees_of_freedom = length(pre_labels),
+      pretrend_p_value = pchisq(statistic, df = length(pre_labels), lower.tail = FALSE),
       bootstrap_repetitions = common_boot
     )
   }

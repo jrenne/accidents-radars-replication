@@ -8,8 +8,12 @@ out_dir <- file.path(root, "results", "current")
 result_files <- data.table(
   corridor_half_width_m = c(50, 100),
   event_file = c(
-    "event_study_monthly_road_corridor_network_balanced24_reach75.csv",
-    "event_study_monthly_road_corridor_network_100m_balanced24_reach75.csv"
+    "event_study_monthly_road_corridor_network_balanced12_reach75.csv",
+    "event_study_monthly_road_corridor_network_100m_balanced12_reach75.csv"
+  ),
+  bootstrap_file = c(
+    "bootstrap_monthly_road_corridor_network_balanced12_reach75.csv",
+    "bootstrap_monthly_road_corridor_network_100m_balanced12_reach75.csv"
   ),
   average_file = c(
     "estimates_monthly_road_corridor_network_balanced12_reach75.csv",
@@ -51,12 +55,29 @@ setorder(summary, corridor_half_width_m, radius_km)
 fwrite(summary, file.path(out_dir, "network_baseline_summary.csv"))
 
 events <- events[outcome == "accidents" & radius_km == 2]
-window_order <- c(
-  "-24:-19", "-18:-13", "-12:-7", "+1:+6", "+7:+12",
-  "+13:+18", "+19:+24"
-)
+window_order <- c("-24:-19", "-18:-13", "+1:+6", "+7:+12")
+events <- events[window %chin% window_order]
 events[, x := match(window, window_order)]
 setorder(events, corridor_half_width_m, x)
+
+# Simultaneous bands refer only to the four bins displayed here.
+for (width in c(50, 100)) {
+  rows <- which(events$corridor_half_width_m == width)
+  boot <- fread(file.path(
+    out_dir, result_files[corridor_half_width_m == width, bootstrap_file]
+  ))[outcome == "accidents" & radius_km == 2 &
+       window_type == "event" & window %chin% window_order]
+  boot <- dcast(boot, bootstrap_draw ~ window, value.var = "estimate")
+  setcolorder(boot, c("bootstrap_draw", window_order))
+  deviations <- sweep(as.matrix(boot[, -"bootstrap_draw"]), 2,
+                      events$estimate[rows], "-")
+  t_draws <- sweep(deviations, 2, events$std_error_bootstrap[rows], "/")
+  critical <- unname(quantile(apply(abs(t_draws), 1, max), 0.95))
+  events$conf_low_simultaneous_95[rows] <-
+    events$estimate[rows] - critical * events$std_error_bootstrap[rows]
+  events$conf_high_simultaneous_95[rows] <-
+    events$estimate[rows] + critical * events$std_error_bootstrap[rows]
+}
 
 colors <- c(`50` = "#2B6F9F", `100` = "#D65F3C")
 shifts <- c(`50` = -0.07, `100` = 0.07)
@@ -72,13 +93,13 @@ png(
 )
 par(mar = c(5.8, 6.8, 1.0, 1.0), mgp = c(3.6, 1.0, 0), tcl = -0.3)
 plot(
-  NA, NA, xlim = c(0.5, 7.5), ylim = ylim, xaxt = "n",
+  NA, NA, xlim = c(0.5, 4.5), ylim = ylim, xaxt = "n",
   xlab = "Months relative to camera installation",
   ylab = "Monthly difference in injury crashes",
   cex.axis = 1.35, cex.lab = 1.55
 )
 abline(h = 0, col = "#777777", lty = 2, lwd = 1.5)
-abline(v = 3.5, col = "#A9A9A9", lty = 3, lwd = 1.5)
+abline(v = 2.5, col = "#A9A9A9", lty = 3, lwd = 1.5)
 for (width in c(50, 100)) {
   z <- events[corridor_half_width_m == width]
   x <- z$x + shifts[as.character(width)]

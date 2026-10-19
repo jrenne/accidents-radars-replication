@@ -1,7 +1,7 @@
 outcome,radius_km,design_radius_km,common_radius_sample,balanced_event_horizon,minimum_network_reach_ratio,date_confidence_filter,corridor_half_width_m,spatial_method,pretrend_wald_statistic,degrees_of_freedom,pretrend_p_value,bootstrap_repetitions
-accidents,1,1,FALSE,12,0.75,all,100,network,0.741913758365895,3,0.863303882284353,1999
-killed,1,1,FALSE,12,0.75,all,100,network,1.14417703233047,3,0.766421675030076,1999
-accidents,2,2,FALSE,12,0.75,all,100,network,3.81014454447083,3,0.282708353094645,1999
-killed,2,2,FALSE,12,0.75,all,100,network,2.7792032903365,3,0.426934877906317,1999
-accidents,3,3,FALSE,12,0.75,all,100,network,4.81521484146592,3,0.1858389753383,1999
-killed,3,3,FALSE,12,0.75,all,100,network,0.572795706338626,3,0.902630939210884,1999
+accidents,1,1,FALSE,12,0.75,all,100,network,0.533629773017563,2,0.765814821000236,1999
+killed,1,1,FALSE,12,0.75,all,100,network,1.1334209823819,2,0.567388802707772,1999
+accidents,2,2,FALSE,12,0.75,all,100,network,1.97151891207467,2,0.373155723928848,1999
+killed,2,2,FALSE,12,0.75,all,100,network,1.56488998375161,2,0.457286581387949,1999
+accidents,3,3,FALSE,12,0.75,all,100,network,4.55284327440853,2,0.102650872355529,1999
+killed,3,3,FALSE,12,0.75,all,100,network,0.452610009021963,2,0.797474831147363,1999

@@ -1,5 +1,5 @@
 sample,unique_sites,site_months,accident_assignments,nonzero_site_months,sites_with_any_accident,zero_site_month_share
 Treated sites: months -24 to -1,406,9744,395,343,176,0.964798850574713
-Treated sites: months -6 to -1,406,2436,111,92,71,0.962233169129721
+Treated sites: months -12 to -1,406,4872,196,171,115,0.964901477832512
 Treated sites: months +1 to +12,406,4872,158,141,87,0.971059113300493
 Distinct treated and control observations used,639,56392,2370,1932,413,0.965739821251241

@@ -243,9 +243,11 @@ message("Reconstructing the baseline and common-radius risk sets...")
 baseline <- build_first_year_sample(radius = 2, design_radius = 2)
 common <- build_first_year_sample(radius = 2, design_radius = 3)
 stopifnot(
-  uniqueN(baseline[role == "treated", cle_radar]) == 406L,
-  uniqueN(baseline[role == "control", cle_radar]) == 477L,
-  uniqueN(common[role == "treated", cle_radar]) == 327L
+  baseline[role == "treated", uniqueN(cle_radar)] == 406L,
+  baseline[role == "control", uniqueN(cle_radar)] == 477L,
+  common[role == "treated", uniqueN(cle_radar)] == 327L,
+  all(common[role == "treated", unique(cle_radar)] %chin%
+        baseline[role == "treated", unique(cle_radar)])
 )
 
 baseline_treated <- unique(baseline[role == "treated", cle_radar])
@@ -262,10 +264,10 @@ membership[, `:=`(
   common_radius_treated = cle_radar %chin% common_treated
 )]
 membership[, estimation_role := fcase(
-  common_radius_treated, "Common 1--2--3 km treated sample",
-  baseline_treated, "Additional 2 km treated sites",
-  baseline_control, "Control sites only",
-  default = "Not used in the 2 km baseline"
+  common_radius_treated, "Treated: all three radii",
+  baseline_treated, "Treated: 2 km sample only",
+  baseline_control, "Control only",
+  default = "Not used in baseline"
 )]
 membership[, deployment_cohort := cut(
   installation_year,
@@ -310,7 +312,7 @@ treated_cells[, accidents := {
   as.numeric(count_values[cbind(row, column)])
 }]
 reference_cells <- treated_anchors[, {
-  months <- anchor_month + (-6L:-1L)
+  months <- anchor_month + (-12L:-1L)
   .(month_index = months)
 }, by = cle_radar]
 reference_cells[, accidents := {
@@ -335,7 +337,7 @@ sample_counts <- rbindlist(list(
     treated_cells[period == "Months -24 to -1"],
     "Treated sites: months -24 to -1"
   ),
-  summarise_cells(reference_cells, "Treated sites: months -6 to -1"),
+  summarise_cells(reference_cells, "Treated sites: months -12 to -1"),
   summarise_cells(
     treated_cells[period == "Months +1 to +12"],
     "Treated sites: months +1 to +12"
@@ -362,8 +364,8 @@ cohort_colours <- c(
   "2020--2024" = "#FDE725"
 )
 role_levels <- c(
-  "Control sites only", "Additional 2 km treated sites",
-  "Common 1--2--3 km treated sample"
+  "Not used in baseline", "Control only",
+  "Treated: 2 km sample only", "Treated: all three radii"
 )
 map_membership[, estimation_role := factor(estimation_role, levels = role_levels)]
 
@@ -398,32 +400,37 @@ p_deployment <- ggplot() +
   )) +
   map_theme
 
-role_shapes <- c(0, 16, 17)
-role_colours <- c("#555555", "#2166AC", "#B2182B")
+role_shapes <- setNames(c(20, 0, 16, 17), role_levels)
+role_colours <- setNames(
+  c("#C7C7C7", "#555555", "#2166AC", "#B2182B"), role_levels
+)
 p_sample <- ggplot() +
   geom_path(
     data = outline, aes(x, y, group = group),
     colour = "#B8B8B8", linewidth = 0.22
   ) +
   geom_point(
-    data = map_membership[is.na(estimation_role)],
-    aes(x, y), colour = "#D0D0D0", shape = 20, size = 0.82, alpha = 0.72
+    data = map_membership[estimation_role == "Not used in baseline"],
+    aes(x, y, shape = estimation_role, colour = estimation_role),
+    size = 0.82, alpha = 0.72
   ) +
   geom_point(
-    data = map_membership[!is.na(estimation_role)],
+    data = map_membership[estimation_role != "Not used in baseline"],
     aes(x, y, shape = estimation_role, colour = estimation_role),
     size = 1.28, alpha = 0.9, stroke = 0.65
   ) +
-  scale_shape_manual(values = role_shapes, drop = FALSE) +
-  scale_colour_manual(values = role_colours, drop = FALSE) +
+  scale_shape_manual(values = role_shapes, breaks = role_levels, drop = FALSE) +
+  scale_colour_manual(values = role_colours, breaks = role_levels, drop = FALSE) +
   coord_equal(xlim = c(0, 1300000), ylim = c(6000000, 7200000), expand = FALSE) +
   labs(title = "(b) Role in the estimation sample") +
   guides(
-    shape = guide_legend(
-      nrow = 3, byrow = TRUE,
-      override.aes = list(size = 3.8, alpha = 1)
+    colour = guide_legend(
+      nrow = 4, byrow = TRUE,
+      override.aes = list(
+        shape = unname(role_shapes[role_levels]), size = 3.8, alpha = 1
+      )
     ),
-    colour = "none"
+    shape = "none"
   ) +
   map_theme
 

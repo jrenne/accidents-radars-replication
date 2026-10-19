@@ -28,7 +28,7 @@ if (any(!file.exists(needed))) stop("Missing placebo input(s): ", paste(needed[!
 
 leads <- fread(event_file)[
   outcome == "accidents" & radius_km == 2 &
-    window %chin% c("-24:-19", "-18:-13", "-12:-7")
+    window %chin% c("-24:-19", "-18:-13")
 ]
 leads[, `:=`(
   placebo_type = "Temporal lead",

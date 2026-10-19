@@ -1,3 +1,0 @@
-outcome,specification,term,estimate,std_error_cluster,conf_low_95,conf_high_95,p_value_cluster,n,pairs
-accidents_difference,monthly_matched_pre_treatment_TMJA,post,-0.039472112208474,0.0339597887245731,-0.109900403436077,0.030956179019129,0.257560177015967,1104,23
-killed_difference,monthly_matched_pre_treatment_TMJA,post,-0.0103970231148806,0.00875640118587269,-0.0285566877060249,0.00776264147626364,0.247747186117776,1104,23

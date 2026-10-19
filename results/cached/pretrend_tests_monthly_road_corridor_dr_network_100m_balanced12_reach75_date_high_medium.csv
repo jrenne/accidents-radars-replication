@@ -1,3 +1,0 @@
-outcome,radius_km,design_radius_km,common_radius_sample,balanced_event_horizon,minimum_network_reach_ratio,date_confidence_filter,corridor_half_width_m,spatial_method,pretrend_wald_statistic,degrees_of_freedom,pretrend_p_value,bootstrap_repetitions
-accidents,2,2,FALSE,12,0.75,high_medium,100,network,2.88327627792858,3,0.409973982489886,1999
-killed,2,2,FALSE,12,0.75,high_medium,100,network,2.45296085979308,3,0.483852118725278,1999

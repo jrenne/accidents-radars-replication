@@ -1,7 +1,0 @@
-outcome,radius_km,corridor_half_width_m,spatial_method,pretrend_wald_statistic,degrees_of_freedom,pretrend_p_value,bootstrap_repetitions
-accidents,1,100,network,1.63817515182076,3,0.650765168466735,499
-killed,1,100,network,2.38993035420112,3,0.495511836680079,499
-accidents,2,100,network,8.40500947995025,3,0.0383425574770884,499
-killed,2,100,network,0.88842665970958,3,0.828219786412112,499
-accidents,3,100,network,5.22838593076101,3,0.155817404034424,499
-killed,3,100,network,1.15997113123213,3,0.762620011004653,499
