@@ -25,7 +25,7 @@
 "baseline_large_city_sensitivity.csv","5b7e96b6b96279f86fc57cce9c17201a"
 "baseline_leave_one_cohort_out.csv","175225a454f62a44a97c0f1b0c615595"
 "baseline_overlap_summary.csv","0adda941a38be6d110299cc0cbf094c2"
-"baseline_placebo_summary.csv","7ea611f76f830d7fe59ddab8d9c5e087"
+"baseline_placebo_summary.csv","41655ba0e1102c7b31bc5d533d535318"
 "baseline_radar_sample_membership.csv","d81861bf60a6f67779b7abd2c6624b35"
 "baseline_tmja_coverage_summary.csv","ce1c247136c14a0504a5010003f9e592"
 "baseline_tmja_geometry_coverage_summary.csv","ce95d8054a6032e834afe4b166747193"
@@ -139,3 +139,4 @@
 "simulation_local_dr_score.csv","c6861d2f4deebf6fc9106d424222a3c4"
 "spatial_measurement_comparison.csv","d2c7369637a7c999deb280aac2c93a59"
 "spatial_measurement_paired_differences.csv","cdf29c89d4edade927b6250c8aa8f932"
+"event_study_first_year_display.csv","6a6e9584d527af90a46b0bf8250c1406"

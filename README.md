@@ -42,6 +42,9 @@ Long computations are therefore optional: the default `quick` mode uses the
 lightweight cached outputs in `results/cached/`. Their checksums are verified
 before they are copied to `results/current/`.
 
+`event_study_first_year_display.csv` records the four event-time contrasts and
+simultaneous bands plotted in the main paper, separately for each corridor width.
+
 ## Data and requirements
 
 The code verifies and loads versioned inputs from release `v1.1.0` of the data

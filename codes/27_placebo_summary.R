@@ -12,7 +12,7 @@ out_dir <- file.path(root, "results", "current")
 
 event_file <- file.path(
   out_dir,
-  "event_study_monthly_road_corridor_network_100m_balanced12_reach75.csv"
+  "event_study_first_year_display.csv"
 )
 pretrend_file <- file.path(
   out_dir,
@@ -27,7 +27,7 @@ needed <- c(event_file, pretrend_file, offroad_file, paired_file)
 if (any(!file.exists(needed))) stop("Missing placebo input(s): ", paste(needed[!file.exists(needed)], collapse = ", "))
 
 leads <- fread(event_file)[
-  outcome == "accidents" & radius_km == 2 &
+  outcome == "accidents" & radius_km == 2 & corridor_half_width_m == 100 &
     window %chin% c("-24:-19", "-18:-13")
 ]
 leads[, `:=`(

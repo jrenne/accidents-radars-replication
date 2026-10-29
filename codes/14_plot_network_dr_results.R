@@ -72,12 +72,20 @@ for (width in c(50, 100)) {
   deviations <- sweep(as.matrix(boot[, -"bootstrap_draw"]), 2,
                       events$estimate[rows], "-")
   t_draws <- sweep(deviations, 2, events$std_error_bootstrap[rows], "/")
-  critical <- unname(quantile(apply(abs(t_draws), 1, max), 0.95))
+  max_t <- apply(abs(t_draws), 1, max)
+  critical <- unname(quantile(max_t, 0.95))
+  events$simultaneous_critical_95[rows] <- critical
+  events$p_value_simultaneous[rows] <- vapply(
+    abs(events$estimate[rows] / events$std_error_bootstrap[rows]),
+    function(t) mean(max_t >= t), numeric(1)
+  )
   events$conf_low_simultaneous_95[rows] <-
     events$estimate[rows] - critical * events$std_error_bootstrap[rows]
   events$conf_high_simultaneous_95[rows] <-
     events$estimate[rows] + critical * events$std_error_bootstrap[rows]
 }
+
+fwrite(events, file.path(out_dir, "event_study_first_year_display.csv"))
 
 colors <- c(`50` = "#2B6F9F", `100` = "#D65F3C")
 shifts <- c(`50` = -0.07, `100` = 0.07)
