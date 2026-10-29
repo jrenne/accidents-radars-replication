@@ -1,5 +1,5 @@
 file,url,sha256
-accidents.csv.gz,https://raw.githubusercontent.com/jrenne/accidents-radars-france/v1.1.0/data/processed/accidents.csv.gz,c9bc9d240b91906cc07d74322cf57b028248750dbdbec4e7fe16be05cf5936f6
-radars.csv.gz,https://raw.githubusercontent.com/jrenne/accidents-radars-france/v1.1.0/data/processed/radars.csv.gz,dbd2e3d25ea5c8d49d9abd295c4e2d7d742c8a7cc7327d0c6bc4fff6bc425d92
-radars_inventaires.csv.gz,https://raw.githubusercontent.com/jrenne/accidents-radars-france/v1.1.0/data/processed/radars_inventaires.csv.gz,ae1ccb7f758c024a845e25d2e3781b686b1be45448e6671ccbda10c3069bf478
-usagers.csv.gz,https://raw.githubusercontent.com/jrenne/accidents-radars-france/v1.1.0/data/processed/usagers.csv.gz,bdbb8bd44f5af4a566a218458184c60f1f0eec5509c6e35dd18b4392f1e660ee
+accidents.csv.gz,https://raw.githubusercontent.com/jrenne/accidents-radars-france/ed2c0c4b23fff700938d051acfb79a83a01fa11d/data/processed/accidents.csv.gz,c9bc9d240b91906cc07d74322cf57b028248750dbdbec4e7fe16be05cf5936f6
+radars.csv.gz,https://raw.githubusercontent.com/jrenne/accidents-radars-france/ed2c0c4b23fff700938d051acfb79a83a01fa11d/data/processed/radars.csv.gz,dbd2e3d25ea5c8d49d9abd295c4e2d7d742c8a7cc7327d0c6bc4fff6bc425d92
+radars_inventaires.csv.gz,https://raw.githubusercontent.com/jrenne/accidents-radars-france/ed2c0c4b23fff700938d051acfb79a83a01fa11d/data/processed/radars_inventaires.csv.gz,ae1ccb7f758c024a845e25d2e3781b686b1be45448e6671ccbda10c3069bf478
+usagers.csv.gz,https://raw.githubusercontent.com/jrenne/accidents-radars-france/ed2c0c4b23fff700938d051acfb79a83a01fa11d/data/processed/usagers.csv.gz,bdbb8bd44f5af4a566a218458184c60f1f0eec5509c6e35dd18b4392f1e660ee

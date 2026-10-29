@@ -52,8 +52,10 @@ simultaneous bands plotted in the main paper, separately for each corridor width
 
 ## Data and requirements
 
-The code verifies and loads versioned inputs from release `v1.1.0` of the data
-repository. Downloads are stored under `data/` and ignored by Git. A sibling
+The code loads the version 1.1.0 CSV tables and auxiliary-input archive
+directly from the data repository; no GitHub Release is needed. The CSV links
+point to a fixed commit, and all inputs are checked against their SHA-256
+checksums. Downloads are stored under `data/` and ignored by Git. A sibling
 checkout of `accidents-radars-france` is used automatically when available.
 
 The analysis was prepared with R 4.5. Install the required packages once:

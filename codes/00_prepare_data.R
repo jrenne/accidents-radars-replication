@@ -50,10 +50,10 @@ bundle_sha <- "1011a15b8df6970854e66b320e84a30defbac9580799a035805e4bbb094c62d4"
 bundle_target <- file.path(downloads_dir, bundle_name)
 bundle_local <- Sys.getenv(
   "REPLICATION_INPUT_BUNDLE",
-  file.path(data_repo, "release", bundle_name)
+  file.path(data_repo, "data", "replication", bundle_name)
 )
 bundle_url <- paste0(
-  "https://github.com/jrenne/accidents-radars-france/releases/download/v1.1.0/",
+  "https://raw.githubusercontent.com/jrenne/accidents-radars-france/main/data/replication/",
   bundle_name
 )
 sentinel <- file.path(root, "data", paste0(".", bundle_sha))
@@ -74,7 +74,9 @@ if (!file.exists(sentinel)) {
     }
     if (!file.rename(temporary, bundle_target)) stop("Could not install input bundle.")
   }
-  utils::untar(bundle_target, exdir = file.path(root, "data"))
+  if (utils::untar(bundle_target, exdir = file.path(root, "data")) != 0L) {
+    stop("Could not extract the auxiliary-input bundle.")
+  }
   writeLines(bundle_sha, sentinel)
 }
 
