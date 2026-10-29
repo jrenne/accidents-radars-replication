@@ -24,9 +24,9 @@ Three modes are available:
 
 Reported inference uses 2,000 estimates: the original-sample estimate and
 1,999 cluster-bootstrap resamples. A small number of resamples can be used for
-a test run. The spatial inputs are frozen for reproducibility; set
-`rebuild_spatial_inputs <- TRUE` only to reconstruct them from the source
-files.
+a test run. The spatial inputs are frozen for reproducibility; in `full`
+mode, set `rebuild_spatial_inputs <- TRUE` to reconstruct them from the
+source files.
 
 The main estimator is a simple stacked difference-in-differences: for each
 newly treated camera site, its before--after change is compared with the mean
@@ -41,6 +41,11 @@ serve as future-treated controls when they satisfy the remaining rules.
 Long computations are therefore optional: the default `quick` mode uses the
 lightweight cached outputs in `results/cached/`. Their checksums are verified
 before they are copied to `results/current/`.
+
+In `codes/run_article_replication.R`, each robustness check specifies only the
+settings that differ from the baseline. Script 11 constructs the monthly
+crash counts; script 13 estimates both the simple DiD and the doubly robust
+specification.
 
 `event_study_first_year_display.csv` records the four event-time contrasts and
 simultaneous bands plotted in the main paper, separately for each corridor width.

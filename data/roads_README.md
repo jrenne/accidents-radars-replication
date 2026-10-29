@@ -13,9 +13,10 @@ Les scripts ne téléchargent pas la France entière. Ils interrogent le service
 autour de chaque radar, d'abord dans un rayon de 350 mètres pour identifier la
 route numérotée, puis dans une emprise couvrant 3,5 km autour du radar pour
 reconstituer le corridor local. Les résultats dérivés et les diagnostics sont
-conservés dans `replication-master/output/` ; les géométries brutes ne sont pas
+conservés dans `results/current/` ; les géométries brutes ne sont pas
 redistribuées.
 
 Le script `10_match_radars_to_ign_roads.R` réalise le rattachement radar–route.
-Le script `11_monthly_road_corridor_did.R` construit les comptages mensuels et
-estime le diff-in-diff.
+Le script `11_monthly_road_corridor_did.R` construit les comptages mensuels.
+Le script `13_doubly_robust_road_corridor_did.R` estime le diff-in-diff simple
+et sa variante doublement robuste.

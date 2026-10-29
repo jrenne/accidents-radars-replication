@@ -48,93 +48,69 @@ if (length(missing_inputs)) {
   stop("Missing required input(s): ", paste(missing_inputs, collapse = ", "))
 }
 
-step <- function(label, script, env = character(), engine = "Rscript") {
-  list(label = label, script = script, env = env, engine = engine)
+step <- function(label, script, env = character(), engine = "Rscript",
+                 main = FALSE, spatial = FALSE) {
+  list(label = label, script = script, env = env, engine = engine,
+       main = main, spatial = spatial)
 }
 
-common_dr <- c(
-  paste0("DR_BOOTSTRAP_REPETITIONS=", bootstrap_repetitions),
-  "DR_BALANCED_EVENT_HORIZON=12",
-  "DR_MIN_NETWORK_REACH_RATIO=0.75"
-)
+# Defaults are the baseline specification; each check lists only its changes.
+estimate <- function(label, width = 100, radii = "2", horizon = 12,
+                     reach = "0.75", method = "network", env = character(),
+                     main = FALSE) {
+  step(label, "13_doubly_robust_road_corridor_did.R", c(
+    paste0("DR_BOOTSTRAP_REPETITIONS=", bootstrap_repetitions),
+    paste0("DR_BALANCED_EVENT_HORIZON=", horizon),
+    paste0("DR_MIN_NETWORK_REACH_RATIO=", reach),
+    paste0("DR_RADII=", radii),
+    paste0("CORRIDOR_METHOD=", method),
+    paste0("CORRIDOR_HALF_WIDTH_M=", width), env
+  ), main = main)
+}
 
 steps <- list(
-  step("Match cameras to IGN roads", "10_match_radars_to_ign_roads.R"),
-  step("Audit treatment dates", "19_audit_radar_treatment_dates.R"),
+  step("Match cameras to IGN roads", "10_match_radars_to_ign_roads.R", spatial = TRUE),
+  step("Audit treatment dates", "19_audit_radar_treatment_dates.R", main = TRUE),
   step("Build 50 m network corridors", "11_monthly_road_corridor_did.R",
-       c("BUILD_ONLY=1", "CORRIDOR_METHOD=network", "CORRIDOR_HALF_WIDTH_M=50")),
+       c("CORRIDOR_METHOD=network", "CORRIDOR_HALF_WIDTH_M=50"), spatial = TRUE),
   step("Build 100 m network corridors", "11_monthly_road_corridor_did.R",
-       c("BUILD_ONLY=1", "CORRIDOR_METHOD=network", "CORRIDOR_HALF_WIDTH_M=100")),
+       c("CORRIDOR_METHOD=network", "CORRIDOR_HALF_WIDTH_M=100"), spatial = TRUE),
   step("Build 100 m Euclidean road corridors", "11_monthly_road_corridor_did.R",
-       c("BUILD_ONLY=1", "CORRIDOR_METHOD=euclidean", "CORRIDOR_HALF_WIDTH_M=100")),
-  step("Build circular outcomes", "15_build_euclidean_circle_counts.R"),
-  step("Build off-road negative control", "17_build_offroad_placebo_counts.R"),
+       c("CORRIDOR_METHOD=euclidean", "CORRIDOR_HALF_WIDTH_M=100"), spatial = TRUE),
+  step("Build circular outcomes", "15_build_euclidean_circle_counts.R", spatial = TRUE),
+  step("Build off-road negative control", "17_build_offroad_placebo_counts.R", spatial = TRUE),
   step("Build corridors including large cities", "11_monthly_road_corridor_did.R",
-       c("BUILD_ONLY=1", "CORRIDOR_METHOD=network", "CORRIDOR_HALF_WIDTH_M=100",
-         "EXCLUDE_LARGE_CITIES=0")),
+       c("CORRIDOR_METHOD=network", "CORRIDOR_HALF_WIDTH_M=100",
+         "EXCLUDE_LARGE_CITIES=0"), spatial = TRUE),
 
-  step("Estimate stacked DiD baseline, 50 m", "13_doubly_robust_road_corridor_did.R",
-       c(common_dr, "DR_RADII=1,2,3", "CORRIDOR_METHOD=network",
-         "CORRIDOR_HALF_WIDTH_M=50")),
-  step("Estimate stacked DiD baseline, 100 m", "13_doubly_robust_road_corridor_did.R",
-       c(common_dr, "DR_RADII=1,2,3", "CORRIDOR_METHOD=network",
-         "CORRIDOR_HALF_WIDTH_M=100")),
-  step("Estimate doubly robust robustness check", "13_doubly_robust_road_corridor_did.R",
-       c(common_dr, "DR_RADII=1,2,3", "CORRIDOR_METHOD=network",
-         "CORRIDOR_HALF_WIDTH_M=100", "PRIMARY_ESTIMATOR=doubly_robust")),
-  step("Estimate balanced dynamics, 50 m", "13_doubly_robust_road_corridor_did.R",
-       c(paste0("DR_BOOTSTRAP_REPETITIONS=", bootstrap_repetitions), "DR_BALANCED_EVENT_HORIZON=24",
-         "DR_MIN_NETWORK_REACH_RATIO=0.75", "DR_RADII=2",
-         "CORRIDOR_METHOD=network", "CORRIDOR_HALF_WIDTH_M=50")),
-  step("Estimate balanced dynamics, 100 m", "13_doubly_robust_road_corridor_did.R",
-       c(paste0("DR_BOOTSTRAP_REPETITIONS=", bootstrap_repetitions), "DR_BALANCED_EVENT_HORIZON=24",
-         "DR_MIN_NETWORK_REACH_RATIO=0.75", "DR_RADII=2",
-         "CORRIDOR_METHOD=network", "CORRIDOR_HALF_WIDTH_M=100")),
-  step("Estimate common-radius sample", "13_doubly_robust_road_corridor_did.R",
-       c(common_dr, "DR_RADII=1,2,3", "DR_COMMON_RADIUS_SAMPLE=1",
-         "CORRIDOR_METHOD=network", "CORRIDOR_HALF_WIDTH_M=100")),
+  estimate("Estimate stacked DiD baseline, 50 m", width = 50, radii = "1,2,3", main = TRUE),
+  estimate("Estimate stacked DiD baseline, 100 m", radii = "1,2,3", main = TRUE),
+  estimate("Estimate doubly robust robustness check", radii = "1,2,3",
+           env = "PRIMARY_ESTIMATOR=doubly_robust", main = TRUE),
+  estimate("Estimate balanced dynamics, 50 m", width = 50, horizon = 24, main = TRUE),
+  estimate("Estimate balanced dynamics, 100 m", horizon = 24, main = TRUE),
+  estimate("Estimate common-radius sample", radii = "1,2,3",
+           env = "DR_COMMON_RADIUS_SAMPLE=1", main = TRUE),
 
-  step("Estimate circular outcome", "13_doubly_robust_road_corridor_did.R",
-       c(common_dr, "DR_RADII=2", "CORRIDOR_METHOD=circle",
-         "CORRIDOR_HALF_WIDTH_M=100")),
-  step("Estimate Euclidean road corridor", "13_doubly_robust_road_corridor_did.R",
-       c(common_dr, "DR_RADII=2", "CORRIDOR_METHOD=euclidean",
-         "CORRIDOR_HALF_WIDTH_M=100")),
-  step("Estimate off-road negative control", "13_doubly_robust_road_corridor_did.R",
-       c(common_dr, "DR_RADII=2", "CORRIDOR_METHOD=offroad",
-         "CORRIDOR_HALF_WIDTH_M=100")),
+  estimate("Estimate circular outcome", method = "circle"),
+  estimate("Estimate Euclidean road corridor", method = "euclidean"),
+  estimate("Estimate off-road negative control", method = "offroad"),
 
-  step("Estimate 50 percent graph threshold", "13_doubly_robust_road_corridor_did.R",
-       c(paste0("DR_BOOTSTRAP_REPETITIONS=", bootstrap_repetitions), "DR_BALANCED_EVENT_HORIZON=12",
-         "DR_MIN_NETWORK_REACH_RATIO=0.50", "DR_RADII=2",
-         "CORRIDOR_METHOD=network", "CORRIDOR_HALF_WIDTH_M=100")),
-  step("Estimate 90 percent graph threshold", "13_doubly_robust_road_corridor_did.R",
-       c(paste0("DR_BOOTSTRAP_REPETITIONS=", bootstrap_repetitions), "DR_BALANCED_EVENT_HORIZON=12",
-         "DR_MIN_NETWORK_REACH_RATIO=0.90", "DR_RADII=2",
-         "CORRIDOR_METHOD=network", "CORRIDOR_HALF_WIDTH_M=100")),
-  step("Estimate sample including large cities", "13_doubly_robust_road_corridor_did.R",
-       c(common_dr, "DR_RADII=2", "CORRIDOR_METHOD=network",
-         "CORRIDOR_HALF_WIDTH_M=100", "DR_EXCLUDE_LARGE_CITIES=0")),
-  step("Estimate exact-road-match sample", "13_doubly_robust_road_corridor_did.R",
-       c(common_dr, "DR_RADII=2", "CORRIDOR_METHOD=network",
-         "CORRIDOR_HALF_WIDTH_M=100", "DR_ROAD_MATCH=exact")),
-  step("Estimate binary outcome", "13_doubly_robust_road_corridor_did.R",
-       c(common_dr, "DR_RADII=2", "CORRIDOR_METHOD=network",
-         "CORRIDOR_HALF_WIDTH_M=100", "DR_OUTCOME_SCALE=binary")),
-  step("Estimate high-confidence dates", "13_doubly_robust_road_corridor_did.R",
-       c(common_dr, "DR_RADII=2", "CORRIDOR_METHOD=network",
-         "CORRIDOR_HALF_WIDTH_M=100", "DR_DATE_CONFIDENCE=high")),
-  step("Estimate high/medium-confidence dates", "13_doubly_robust_road_corridor_did.R",
-       c(common_dr, "DR_RADII=2", "CORRIDOR_METHOD=network",
-         "CORRIDOR_HALF_WIDTH_M=100", "DR_DATE_CONFIDENCE=high_medium")),
+  estimate("Estimate 50 percent graph threshold", reach = "0.50"),
+  estimate("Estimate 90 percent graph threshold", reach = "0.90"),
+  estimate("Estimate sample including large cities", env = "DR_EXCLUDE_LARGE_CITIES=0"),
+  estimate("Estimate exact-road-match sample", env = "DR_ROAD_MATCH=exact"),
+  estimate("Estimate binary outcome", env = "DR_OUTCOME_SCALE=binary"),
+  estimate("Estimate high-confidence dates", env = "DR_DATE_CONFIDENCE=high"),
+  estimate("Estimate high/medium-confidence dates", env = "DR_DATE_CONFIDENCE=high_medium"),
 
-  step("Validate doubly robust score", "18_validate_local_dr_score.R"),
-  step("Plot main event study", "14_plot_network_dr_results.R"),
+  step("Validate doubly robust score", "18_validate_local_dr_score.R", main = TRUE),
+  step("Plot main event study", "14_plot_network_dr_results.R", main = TRUE),
   step("Compare spatial outcomes", "16_compare_spatial_measurement.R"),
-  step("Map and describe baseline sample", "20_map_and_describe_baseline_sample.R"),
-  step("Adjust primary family", "21_adjust_primary_family.R"),
-  step("Plot baseline balance", "22_plot_baseline_balance.R"),
-  step("Plot leave-one-cohort-out estimates", "23_plot_leave_one_cohort_out.R"),
+  step("Map and describe baseline sample", "20_map_and_describe_baseline_sample.R", main = TRUE),
+  step("Adjust primary family", "21_adjust_primary_family.R", main = TRUE),
+  step("Plot baseline balance", "22_plot_baseline_balance.R", main = TRUE),
+  step("Plot leave-one-cohort-out estimates", "23_plot_leave_one_cohort_out.R", main = TRUE),
   step("Summarize graph thresholds", "24_graph_completeness_sensitivity.R"),
   step("Summarize large-city sensitivity", "25_large_city_sensitivity.R"),
   step("Summarize exact-road sensitivity", "26_exact_road_match_sensitivity.R"),
@@ -143,39 +119,16 @@ steps <- list(
 
   step("Match TMJA endpoint approximation", "29_build_tmja_radar_matches.R"),
   step("Match full TMJA polylines", "29b_match_tmja_shapefiles.py", engine = "python3"),
-  step("Estimate TMJA sensitivity, 50 m", "13_doubly_robust_road_corridor_did.R",
-       c(common_dr, "DR_RADII=2", "CORRIDOR_METHOD=network",
-         "CORRIDOR_HALF_WIDTH_M=100", "DR_TRAFFIC_ADJUSTMENT=1",
-         "DR_TRAFFIC_MATCH_DISTANCE_M=50")),
-  step("Estimate TMJA sensitivity, 100 m", "13_doubly_robust_road_corridor_did.R",
-       c(common_dr, "DR_RADII=2", "CORRIDOR_METHOD=network",
-         "CORRIDOR_HALF_WIDTH_M=100", "DR_TRAFFIC_ADJUSTMENT=1",
-         "DR_TRAFFIC_MATCH_DISTANCE_M=100")),
+  estimate("Estimate TMJA sensitivity, 50 m",
+           env = c("DR_TRAFFIC_ADJUSTMENT=1", "DR_TRAFFIC_MATCH_DISTANCE_M=50")),
+  estimate("Estimate TMJA sensitivity, 100 m",
+           env = c("DR_TRAFFIC_ADJUSTMENT=1", "DR_TRAFFIC_MATCH_DISTANCE_M=100")),
   step("Summarize TMJA sensitivity", "30_tmja_sensitivity_summary.R")
 )
 
-spatial_labels <- c(
-  "Match cameras to IGN roads", "Build 50 m network corridors",
-  "Build 100 m network corridors", "Build 100 m Euclidean road corridors",
-  "Build circular outcomes", "Build off-road negative control",
-  "Build corridors including large cities"
-)
-main_labels <- c(
-  "Audit treatment dates", "Estimate stacked DiD baseline, 50 m",
-  "Estimate stacked DiD baseline, 100 m",
-  "Estimate doubly robust robustness check",
-  "Estimate balanced dynamics, 50 m", "Estimate balanced dynamics, 100 m",
-  "Estimate common-radius sample", "Validate doubly robust score",
-  "Plot main event study", "Map and describe baseline sample",
-  "Adjust primary family", "Plot baseline balance",
-  "Plot leave-one-cohort-out estimates"
-)
-if (!rebuild_spatial) {
-  steps <- Filter(function(x) !x$label %in% spatial_labels, steps)
-}
-if (mode == "main") {
-  steps <- Filter(function(x) x$label %in% main_labels, steps)
-}
+steps <- Filter(function(x) {
+  (rebuild_spatial || !x$spatial) && (mode == "full" || x$main)
+}, steps)
 
 script_paths <- file.path(analysis_dir, vapply(steps, `[[`, "", "script"))
 missing_scripts <- unique(script_paths[!file.exists(script_paths)])

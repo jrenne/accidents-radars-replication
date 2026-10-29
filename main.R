@@ -2,7 +2,7 @@
 
 mode <- "quick"                 # "quick", "main", or "full"
 bootstrap_repetitions <- 1999L  # use a small value for a test run
-rebuild_spatial_inputs <- FALSE # TRUE rebuilds the frozen spatial inputs
+rebuild_spatial_inputs <- FALSE # TRUE rebuilds spatial inputs in "full" mode
 
 # Run -------------------------------------------------------------------------
 

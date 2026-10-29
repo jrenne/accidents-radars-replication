@@ -1,5 +1,7 @@
 #!/usr/bin/env Rscript
 
+# Construct monthly crash counts. Estimation is handled by script 13.
+
 suppressPackageStartupMessages({
   library(curl)
   library(data.table)
@@ -28,14 +30,11 @@ analysis_suffix <- paste0(method_suffix, width_suffix, city_suffix)
 output_path <- function(stem, extension = ".csv")
   file.path(out_dir, paste0(stem, analysis_suffix, extension))
 maximum_radius_km <- max(radii_km)
-minimum_controls <- 10L
-bootstrap_repetitions <- 499L
 large_city_population_thousands <- 100
 large_city_buffer_km <- 10
 counts_file <- output_path("road_corridor_monthly_counts", ".csv.gz")
 geometry_diagnostic_file <- output_path("road_corridor_geometry_diagnostics")
 max_corridors <- as.integer(Sys.getenv("MAX_CORRIDORS", "999999"))
-build_only <- identical(Sys.getenv("BUILD_ONLY", "0"), "1")
 geometry_cache_dir <- file.path(root, "data", "roads", "ign_road_geometry_cache")
 dir.create(geometry_cache_dir, recursive = TRUE, showWarnings = FALSE)
 
@@ -46,13 +45,6 @@ haversine_km <- function(lat1, lon1, lat2, lon2) {
   a <- sin((lat2 - lat1) * p / 2)^2 +
     cos(lat1 * p) * cos(lat2 * p) * sin((lon2 - lon1) * p / 2)^2
   6371.0088 * 2 * atan2(sqrt(a), sqrt(pmax(0, 1 - a)))
-}
-
-road_class <- function(route) {
-  route <- toupper(gsub("[^A-Z0-9]", "", route))
-  fifelse(grepl("^A[0-9]", route), "autoroute",
-          fifelse(grepl("^N[0-9]", route), "nationale",
-                  fifelse(grepl("^D[0-9]", route), "departementale", "autre")))
 }
 
 fetch_road_geometry <- function(latitude, longitude, road_number) {
@@ -173,12 +165,6 @@ base_candidates <- radars[
     !is.na(road_number) &
     (!exclude_large_cities | near_large_city == FALSE)
 ]
-base_candidates[, `:=`(
-  route_class = road_class(road_number),
-  vma_group = fifelse(is.na(vma_kmh), "vma_missing", paste0("vma_", vma_kmh))
-)]
-base_candidates[, matching_stratum := paste(route_class, vma_group, sep = "__")]
-
 message("Lecture des accidents et des décès...")
 accidents <- fread(
   file.path(processed, "accidents.csv.gz"),
@@ -366,229 +352,4 @@ for (i in seq_len(nrow(todo))) {
   }
 }
 
-if (build_only) {
-  message("Construction-only run completed.")
-  quit(save = "no", status = 0L)
-}
-
-counts <- fread(counts_file)
-geometry_diagnostics <- fread(geometry_diagnostic_file)
-usable_ids <- geometry_diagnostics[status == "ok", cle_radar]
-base_candidates <- base_candidates[cle_radar %chin% usable_ids]
-
-mean_window <- function(values, radar_indices, months, month_columns) {
-  columns <- match(months, month_columns)
-  if (anyNA(columns)) return(rep(NA_real_, length(radar_indices)))
-  rowMeans(values[radar_indices, columns, drop = FALSE])
-}
-
-event_windows <- list(
-  `-24:-19` = c(-24L, -19L), `-18:-13` = c(-18L, -13L),
-  `+1:+6` = c(1L, 6L),
-  `+7:+12` = c(7L, 12L), `+13:+18` = c(13L, 18L),
-  `+19:+24` = c(19L, 24L)
-)
-average_windows <- list(months_1_12 = c(1L, 12L), months_1_24 = c(1L, 24L))
-
-estimate_radius <- function(radius) {
-  candidates <- copy(base_candidates)
-  keep <- logical(nrow(candidates))
-  next_nearby <- rep(Inf, nrow(candidates))
-  for (i in seq_len(nrow(candidates))) {
-    distance <- haversine_km(
-      candidates$latitude[i], candidates$longitude[i], radars$latitude, radars$longitude
-    )
-    other <- radars$cle_radar != candidates$cle_radar[i]
-    keep[i] <- !any(
-      distance < radius & other & radars$installation_month <= candidates$installation_month[i],
-      na.rm = TRUE
-    )
-    later <- radars$installation_month[
-      distance < radius & other & radars$installation_month > candidates$installation_month[i]
-    ]
-    if (length(later)) next_nearby[i] <- min(later)
-  }
-  candidates[, next_nearby_installation_month := next_nearby]
-  candidates <- candidates[keep]
-  setorder(candidates, cle_radar)
-  candidates[, radar_index := .I]
-
-  radius_counts <- counts[radius_km == radius & cle_radar %chin% candidates$cle_radar]
-  accident_matrix <- dcast(radius_counts, cle_radar ~ month_index, value.var = "accidents")
-  killed_matrix <- dcast(radius_counts, cle_radar ~ month_index, value.var = "killed")
-  setorder(accident_matrix, cle_radar)
-  setorder(killed_matrix, cle_radar)
-  candidates <- candidates[cle_radar %chin% accident_matrix$cle_radar]
-  setorder(candidates, cle_radar)
-  candidates[, radar_index := .I]
-  accident_values <- as.matrix(accident_matrix[, -"cle_radar"])
-  killed_values <- as.matrix(killed_matrix[, -"cle_radar"])
-  month_columns <- as.integer(colnames(accident_values))
-
-  build_cells <- function(values, event_start, event_end) {
-    cells <- list()
-    j <- 1L
-    for (i in candidates[installation_year <= 2022L, radar_index]) {
-      anchor <- candidates$installation_month[i]
-      evaluation <- anchor + event_start:event_end
-      reference <- anchor + (-12L:-1L)
-      if (min(c(evaluation, reference)) < min(all_months) ||
-          max(c(evaluation, reference)) > max(all_months)) next
-      if (event_end > 0 && candidates$next_nearby_installation_month[i] <= anchor + event_end) next
-      controls <- candidates[
-        installation_month > anchor + max(0L, event_end) &
-          matching_stratum == candidates$matching_stratum[i], radar_index
-      ]
-      if (length(controls)) {
-        distance <- haversine_km(
-          candidates$latitude[i], candidates$longitude[i],
-          candidates$latitude[controls], candidates$longitude[controls]
-        )
-        controls <- controls[distance > 2 * radius]
-      }
-      if (length(controls) < minimum_controls) next
-      cells[[j]] <- list(
-        treated = i, controls = controls,
-        treated_reference = mean_window(values, i, reference, month_columns),
-        treated_change = mean_window(values, i, evaluation, month_columns) -
-          mean_window(values, i, reference, month_columns),
-        control_change = mean_window(values, controls, evaluation, month_columns) -
-          mean_window(values, controls, reference, month_columns)
-      )
-      j <- j + 1L
-    }
-    cells
-  }
-
-  aggregate_cells <- function(cells, weights = NULL) {
-    if (is.null(weights)) weights <- rep(1, nrow(candidates))
-    numerator <- denominator <- 0
-    for (cell in cells) {
-      tw <- weights[cell$treated]
-      cw <- weights[cell$controls]
-      if (tw == 0 || sum(cw) == 0) next
-      numerator <- numerator + tw *
-        (cell$treated_change - weighted.mean(cell$control_change, cw))
-      denominator <- denominator + tw
-    }
-    if (denominator == 0) NA_real_ else numerator / denominator
-  }
-
-  estimate_windows <- function(window_list, window_column) {
-    result <- list()
-    j <- 1L
-    for (outcome in c("accidents", "killed")) {
-      values <- if (outcome == "accidents") accident_values else killed_values
-      for (label in names(window_list)) {
-        window <- window_list[[label]]
-        cells <- build_cells(values, window[1], window[2])
-        estimate <- aggregate_cells(cells)
-        set.seed(20261012 + as.integer(radius * 100) + j)
-        boot <- replicate(bootstrap_repetitions, {
-          weights <- tabulate(
-            sample.int(nrow(candidates), nrow(candidates), replace = TRUE),
-            nbins = nrow(candidates)
-          )
-          aggregate_cells(cells, weights)
-        })
-        boot <- boot[is.finite(boot)]
-        se <- sd(boot)
-        treated <- unique(vapply(cells, `[[`, integer(1), "treated"))
-        mean_reference <- mean(vapply(cells, `[[`, numeric(1), "treated_reference"))
-        result[[j]] <- data.table(
-          outcome = outcome, radius_km = radius, corridor_half_width_m = corridor_half_width_m,
-          window = label, estimate = estimate, std_error_bootstrap = se,
-          conf_low_95 = estimate - qnorm(0.975) * se,
-          conf_high_95 = estimate + qnorm(0.975) * se,
-          p_value_normal = 2 * pnorm(-abs(estimate / se)),
-          mean_monthly_reference = mean_reference,
-          effect_percent_of_reference = 100 * estimate / mean_reference,
-          treated_radars = length(treated),
-          median_controls_per_radar = median(vapply(cells, function(x) length(x$controls), integer(1))),
-          admissible_sites = nrow(candidates), bootstrap_repetitions = length(boot),
-          reference_window_months = "-12:-1"
-        )
-        setnames(result[[j]], "window", window_column)
-        j <- j + 1L
-      }
-    }
-    rbindlist(result, fill = TRUE)
-  }
-
-  estimate_pretrend_test <- function() {
-    pre_windows <- event_windows[1:2]
-    tests <- list()
-    for (outcome in c("accidents", "killed")) {
-      values <- if (outcome == "accidents") accident_values else killed_values
-      cells <- lapply(pre_windows, function(window) build_cells(values, window[1], window[2]))
-      estimates <- vapply(cells, aggregate_cells, numeric(1))
-      set.seed(20262000 + as.integer(radius * 100) + match(outcome, c("accidents", "killed")))
-      boot <- replicate(bootstrap_repetitions, {
-        weights <- tabulate(
-          sample.int(nrow(candidates), nrow(candidates), replace = TRUE),
-          nbins = nrow(candidates)
-        )
-        vapply(cells, aggregate_cells, numeric(1), weights = weights)
-      })
-      keep_boot <- apply(boot, 2, function(x) all(is.finite(x)))
-      covariance <- cov(t(boot[, keep_boot, drop = FALSE]))
-      statistic <- tryCatch(
-        as.numeric(t(estimates) %*% solve(covariance, estimates)),
-        error = function(e) NA_real_
-      )
-      tests[[outcome]] <- data.table(
-        outcome = outcome, radius_km = radius,
-        corridor_half_width_m = corridor_half_width_m,
-        pretrend_wald_statistic = statistic, degrees_of_freedom = length(estimates),
-        pretrend_p_value = pchisq(statistic, df = length(estimates), lower.tail = FALSE),
-        treated_radars = min(vapply(cells, function(x)
-          length(unique(vapply(x, `[[`, integer(1), "treated"))), integer(1))),
-        bootstrap_repetitions = sum(keep_boot)
-      )
-    }
-    rbindlist(tests)
-  }
-
-  list(
-    event = estimate_windows(event_windows, "event_window_months"),
-    average = estimate_windows(average_windows, "post_window"),
-    pretrend = estimate_pretrend_test()
-  )
-}
-
-message("Estimation des diff-in-diff sur corridors routiers...")
-set.seed(20261012)
-estimates <- lapply(radii_km, estimate_radius)
-event_results <- rbindlist(lapply(estimates, `[[`, "event"), fill = TRUE)
-average_results <- rbindlist(lapply(estimates, `[[`, "average"), fill = TRUE)
-pretrend_results <- rbindlist(lapply(estimates, `[[`, "pretrend"), fill = TRUE)
-fwrite(event_results, output_path("event_study_monthly_road_corridor"))
-fwrite(average_results, output_path("estimates_monthly_road_corridor"))
-fwrite(pretrend_results, output_path("pretrend_tests_monthly_road_corridor"))
-
-# Robustesse conservatrice : uniquement les radars dont le numéro de route de
-# l'inventaire 2018 concorde exactement avec celui de la BD TOPO.
-base_candidates_all_matches <- copy(base_candidates)
-base_candidates <- base_candidates_all_matches[match_method == "exact_route_number"]
-exact_estimates <- lapply(radii_km, estimate_radius)
-exact_event_results <- rbindlist(lapply(exact_estimates, `[[`, "event"), fill = TRUE)
-exact_average_results <- rbindlist(lapply(exact_estimates, `[[`, "average"), fill = TRUE)
-exact_pretrend_results <- rbindlist(lapply(exact_estimates, `[[`, "pretrend"), fill = TRUE)
-fwrite(exact_event_results, output_path("event_study_monthly_road_corridor_exact_matches"))
-fwrite(exact_average_results, output_path("estimates_monthly_road_corridor_exact_matches"))
-fwrite(exact_pretrend_results, output_path("pretrend_tests_monthly_road_corridor_exact_matches"))
-base_candidates <- base_candidates_all_matches
-
-sample_diagnostics <- data.table(
-  point_radars_2012_2024 = nrow(radars[installation_year %between% c(2012L, 2024L)]),
-  matched_to_numbered_road = nrow(matches),
-  candidates_outside_large_cities = nrow(base_candidates),
-  successful_corridors = geometry_diagnostics[status == "ok", .N],
-  median_corridor_accidents_2010_2024 = geometry_diagnostics[status == "ok", median(corridor_accidents)]
-)
-fwrite(sample_diagnostics, output_path("road_corridor_sample_diagnostics"))
-print(sample_diagnostics)
-print(average_results)
-print(pretrend_results)
-message("Robustesse sur concordances exactes seulement :")
-print(exact_average_results)
+message("Monthly corridor counts saved in results/current.")
